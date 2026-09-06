@@ -1,69 +1,61 @@
-name: safe-settings sync
+name: safe-settings
 
 on:
   push:
     branches: [main]
     paths:
       - "safe-settings/**"
-      - ".github/workflows/safe-settings.yml"
   schedule:
-    # Weekly drift correction — Actions mode is batch, so anything changed by
-    # hand in the UI stands until a run happens.
-    - cron: "17 4 * * 1"
+    - cron: "0 0 * * MON"
   workflow_dispatch:
     inputs:
       nop:
-        description: "Report what would change instead of writing (see note below)"
+        description: "Preview only, no writes (currently broken upstream, see README)"
         type: boolean
         default: false
-
-permissions:
-  contents: read
-
-concurrency:
-  group: safe-settings
-  cancel-in-progress: false
 
 jobs:
   sync:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout admin repo
-        uses: actions/checkout@v5
-        with:
-          path: admin
+      - uses: actions/checkout@v7.0.1
 
-      - name: Checkout safe-settings
-        uses: actions/checkout@v5
+      - uses: actions/checkout@v7.0.1
         with:
           repository: github/safe-settings
-          ref: 2.1.21
-          path: safe-settings
+          # 2.1.18 is the last release whose full-sync.js matches its probot
+          # major. 2.1.21 bumps probot to ^14, where Probot#log starts as null
+          # and is only built during initialization -- but full-sync.js still
+          # calls probot.log.info() on its first line, so Actions mode dies
+          # with "Cannot read properties of null (reading 'info')" before any
+          # API call. No env var fixes it; the logger object does not exist yet.
+          ref: 2.1.18
+          path: .safe-settings
 
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v7.0.0
         with:
-          node-version: 22
+          node-version: "24.20.0"
 
-      - name: Install
-        working-directory: safe-settings
+      - name: Install dependencies
         run: npm ci
+        working-directory: .safe-settings
 
-      - name: Sync
-        working-directory: safe-settings
+      - name: Apply settings
+        run: npm run full-sync
+        working-directory: .safe-settings
         env:
           GH_ORG: atunko-dev
+          # A default-level run says nothing about what it changed -- a sync
+          # that reverted a label and one that did nothing log identically.
+          # `debug` names the repos and settings touched, which is the closest
+          # this version gets to a readable account of a run (FULL_SYNC_NOP
+          # crashes, so there is no preview to read instead).
+          LOG_LEVEL: debug
           APP_ID: ${{ vars.SAFE_SETTINGS_APP_ID }}
           PRIVATE_KEY: ${{ secrets.SAFE_SETTINGS_PRIVATE_KEY }}
           ADMIN_REPO: .github
           CONFIG_PATH: safe-settings
-          DEPLOYMENT_CONFIG_FILE: ${{ github.workspace }}/admin/safe-settings/deployment-settings.yml
-          # The only preview knob there is. There is no DRY_RUN variable — a
-          # workflow setting one writes for real while looking careful.
-          # Treat this as wiring: NOP mode has crashed in the 2.1.x line, so
-          # verify a change by diffing the API afterwards, not by trusting a
-          # preview.
+          DEPLOYMENT_CONFIG_FILE: ${{ github.workspace }}/safe-settings/deployment-settings.yml
+          # safe-settings reads FULL_SYNC_NOP. There is no DRY_RUN variable --
+          # the name it replaces did nothing, so every run wrote for real.
           FULL_SYNC_NOP: ${{ inputs.nop && 'true' || 'false' }}
-          # Without debug, a run that reverted a setting and a run that did
-          # nothing produce identical logs.
-          LOG_LEVEL: debug
-        run: npm run full-sync
