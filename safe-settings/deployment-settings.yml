@@ -1,14 +1,17 @@
 # Which repos safe-settings will not touch.
 #
-# This file being present is load-bearing: when it is absent safe-settings
-# restores its own defaults (admin, .github, safe-settings), so deleting it
-# silently changes scope rather than widening it.
+# This file being present is load-bearing, and an empty exclude list doubly so:
+# when the file is ABSENT safe-settings restores its own defaults (admin,
+# .github, safe-settings), which would silently unmanage the admin repo again.
+# An empty list here means "exclude nothing" and is deliberate.
 #
-# .github is the admin repo and excludes itself. There are no archived repos
-# in atunko-dev today; add any that appear, because safe-settings cannot write
-# to an archived repo and one failed write fails the entire run, not just that
-# repo.
+# .github used to be excluded, which left the repo that defines the org's
+# protection as the only repo without any. It is now managed by
+# suborgs/admin.yml.
+#
+# There are no archived repos in atunko-dev today; add any that appear, because
+# safe-settings cannot write to an archived repo and one failed write fails the
+# entire run, not just that repo.
 
 restrictedRepos:
-  exclude:
-    - .github
+  exclude: []
