@@ -29,12 +29,12 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout admin repo
-        uses: actions/checkout@v5
+        uses: actions/checkout@v7
         with:
           path: admin
 
       - name: Checkout safe-settings
-        uses: actions/checkout@v5
+        uses: actions/checkout@v7
         with:
           repository: github/safe-settings
           ref: 2.1.21
