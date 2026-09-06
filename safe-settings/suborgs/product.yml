@@ -22,66 +22,72 @@ repository:
 # Every label the repo has today. This list is not a preference — a label that
 # exists on the repo but is missing here is DELETED on the next sync, and
 # renovate.json5 references eleven of these by name.
+#
+# Colours are quoted, all of them. Unquoted, `5319e7` is valid YAML scientific
+# notation and parses as the float 53190000000, which GitHub rejects with a 422
+# on the colour field; an all-digit hex would parse as an integer the same way.
+# Only some values are affected, which is exactly why the rule is to quote
+# every one rather than the ones that look risky.
 labels:
   - name: bot-renovate
-    color: 1d76db
+    color: "1d76db"
     description: Opened by Renovate
   - name: bot-renovate-stop
-    color: b60205
+    color: "b60205"
     description: Stop Renovate updating this PR
   - name: security
-    color: d93f0b
+    color: "d93f0b"
     description: Security / vulnerability update
   - name: renovate-version-major
-    color: b60205
+    color: "b60205"
     description: Major version update
   - name: renovate-version-minor
-    color: fbca04
+    color: "fbca04"
     description: Minor version update
   - name: renovate-version-patch
-    color: 0e8a16
+    color: "0e8a16"
     description: Patch version update
   - name: renovate-version-digest
-    color: c5def5
+    color: "c5def5"
     description: Digest update
   - name: renovate-type-gradle-plugin
-    color: 5319e7
+    color: "5319e7"
     description: Gradle plugin update
   - name: renovate-type-java
-    color: f9d0c4
+    color: "f9d0c4"
     description: Java / JVM dependency update
   - name: renovate-type-container
-    color: 006b75
+    color: "006b75"
     description: Container image update
   - name: renovate-type-cicd
-    color: bfd4f2
+    color: "bfd4f2"
     description: CI/CD tooling update
   - name: bug
-    color: d73a4a
+    color: "d73a4a"
     description: Something isn't working
   - name: documentation
-    color: 0075ca
+    color: "0075ca"
     description: Improvements or additions to documentation
   - name: duplicate
-    color: cfd3d7
+    color: "cfd3d7"
     description: This issue or pull request already exists
   - name: enhancement
-    color: a2eeef
+    color: "a2eeef"
     description: New feature or request
   - name: good first issue
-    color: 7057ff
+    color: "7057ff"
     description: Good for newcomers
   - name: help wanted
-    color: '008672'
+    color: "008672"
     description: Extra attention is needed
   - name: invalid
-    color: e4e669
+    color: "e4e669"
     description: This doesn't seem right
   - name: question
-    color: d876e3
+    color: "d876e3"
     description: Further information is requested
   - name: wontfix
-    color: ffffff
+    color: "ffffff"
     description: This will not be worked on
 
 # Declared at suborg scope, not org scope: a top-level rulesets block is
