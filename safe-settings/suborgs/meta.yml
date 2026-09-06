@@ -1,0 +1,52 @@
+# Repos without CI. No rulesets here, deliberately: jbang-catalog has no
+# workflows at all, so any required status check would block every PR on it
+# forever. That is why the split is by what CI a repo actually has rather than
+# by what the repos are for.
+
+suborgrepos:
+  - jbang-catalog
+
+# Mirrors what the repo has live. It differs from atunko on every merge setting,
+# which is the reason these are declared per suborg instead of org-wide.
+repository:
+  allow_squash_merge: true
+  allow_merge_commit: true
+  allow_rebase_merge: true
+  allow_auto_merge: false
+  delete_branch_on_merge: false
+  squash_merge_commit_title: COMMIT_OR_PR_TITLE
+  squash_merge_commit_message: COMMIT_MESSAGES
+  has_issues: true
+  has_projects: true
+  has_wiki: true
+
+# The stock GitHub set, which is all this repo has. Listed in full because
+# anything omitted is deleted.
+labels:
+  - name: bug
+    color: d73a4a
+    description: Something isn't working
+  - name: documentation
+    color: 0075ca
+    description: Improvements or additions to documentation
+  - name: duplicate
+    color: cfd3d7
+    description: This issue or pull request already exists
+  - name: enhancement
+    color: a2eeef
+    description: New feature or request
+  - name: good first issue
+    color: 7057ff
+    description: Good for newcomers
+  - name: help wanted
+    color: '008672'
+    description: Extra attention is needed
+  - name: invalid
+    color: e4e669
+    description: This doesn't seem right
+  - name: question
+    color: d876e3
+    description: Further information is requested
+  - name: wontfix
+    color: ffffff
+    description: This will not be worked on

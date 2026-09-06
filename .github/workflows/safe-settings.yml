@@ -1,0 +1,69 @@
+name: safe-settings sync
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "safe-settings/**"
+      - ".github/workflows/safe-settings.yml"
+  schedule:
+    # Weekly drift correction — Actions mode is batch, so anything changed by
+    # hand in the UI stands until a run happens.
+    - cron: "17 4 * * 1"
+  workflow_dispatch:
+    inputs:
+      nop:
+        description: "Report what would change instead of writing (see note below)"
+        type: boolean
+        default: false
+
+permissions:
+  contents: read
+
+concurrency:
+  group: safe-settings
+  cancel-in-progress: false
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout admin repo
+        uses: actions/checkout@v5
+        with:
+          path: admin
+
+      - name: Checkout safe-settings
+        uses: actions/checkout@v5
+        with:
+          repository: github/safe-settings
+          ref: 2.1.21
+          path: safe-settings
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Install
+        working-directory: safe-settings
+        run: npm ci
+
+      - name: Sync
+        working-directory: safe-settings
+        env:
+          GH_ORG: atunko-dev
+          APP_ID: ${{ vars.SAFE_SETTINGS_APP_ID }}
+          PRIVATE_KEY: ${{ secrets.SAFE_SETTINGS_PRIVATE_KEY }}
+          ADMIN_REPO: .github
+          CONFIG_PATH: safe-settings
+          DEPLOYMENT_CONFIG_FILE: ${{ github.workspace }}/admin/safe-settings/deployment-settings.yml
+          # The only preview knob there is. There is no DRY_RUN variable — a
+          # workflow setting one writes for real while looking careful.
+          # Treat this as wiring: NOP mode has crashed in the 2.1.x line, so
+          # verify a change by diffing the API afterwards, not by trusting a
+          # preview.
+          FULL_SYNC_NOP: ${{ inputs.nop && 'true' || 'false' }}
+          # Without debug, a run that reverted a setting and a run that did
+          # nothing produce identical logs.
+          LOG_LEVEL: debug
+        run: npm run full-sync

@@ -1,0 +1,144 @@
+# Repos with real CI: they can carry required status checks.
+#
+# Repos are named explicitly rather than matched with "*" — suborgrepos uses
+# minimatch with no options, so "*" does not match dot-named repos and the
+# admin repo would be caught or missed depending on the pattern.
+
+suborgrepos:
+  - atunko
+
+repository:
+  allow_squash_merge: true
+  allow_merge_commit: false
+  allow_rebase_merge: false
+  allow_auto_merge: true
+  delete_branch_on_merge: true
+  squash_merge_commit_title: PR_TITLE
+  squash_merge_commit_message: BLANK
+  has_issues: true
+  has_projects: false
+  has_wiki: false
+
+# Every label the repo has today. This list is not a preference — a label that
+# exists on the repo but is missing here is DELETED on the next sync, and
+# renovate.json5 references eleven of these by name.
+labels:
+  - name: bot-renovate
+    color: 1d76db
+    description: Opened by Renovate
+  - name: bot-renovate-stop
+    color: b60205
+    description: Stop Renovate updating this PR
+  - name: security
+    color: d93f0b
+    description: Security / vulnerability update
+  - name: renovate-version-major
+    color: b60205
+    description: Major version update
+  - name: renovate-version-minor
+    color: fbca04
+    description: Minor version update
+  - name: renovate-version-patch
+    color: 0e8a16
+    description: Patch version update
+  - name: renovate-version-digest
+    color: c5def5
+    description: Digest update
+  - name: renovate-type-gradle-plugin
+    color: 5319e7
+    description: Gradle plugin update
+  - name: renovate-type-java
+    color: f9d0c4
+    description: Java / JVM dependency update
+  - name: renovate-type-container
+    color: 006b75
+    description: Container image update
+  - name: renovate-type-cicd
+    color: bfd4f2
+    description: CI/CD tooling update
+  - name: bug
+    color: d73a4a
+    description: Something isn't working
+  - name: documentation
+    color: 0075ca
+    description: Improvements or additions to documentation
+  - name: duplicate
+    color: cfd3d7
+    description: This issue or pull request already exists
+  - name: enhancement
+    color: a2eeef
+    description: New feature or request
+  - name: good first issue
+    color: 7057ff
+    description: Good for newcomers
+  - name: help wanted
+    color: '008672'
+    description: Extra attention is needed
+  - name: invalid
+    color: e4e669
+    description: This doesn't seem right
+  - name: question
+    color: d876e3
+    description: Further information is requested
+  - name: wontfix
+    color: ffffff
+    description: This will not be worked on
+
+# Declared at suborg scope, not org scope: a top-level rulesets block is
+# created as an ORGANIZATION ruleset, which requires GitHub Team. atunko-dev is
+# on the free plan. Per-repo rulesets at suborg scope are free, and work here
+# because atunko is public.
+#
+# This must reproduce the ruleset already live on the repo exactly — it was
+# applied by API and the first sync is a migration, not a no-op.
+rulesets:
+  - name: deployable-branches
+    target: branch
+    enforcement: active
+    conditions:
+      ref_name:
+        include:
+          - refs/heads/main
+          - refs/heads/release/*
+          - refs/heads/hotfix/*
+        exclude: []
+    # Admin bypass only. No bot is a bypass actor: bypass_mode is not granular,
+    # so exempting Renovate would exempt it from the required status checks too,
+    # and with auto-merge on, bumps would merge without CI ever being green.
+    # The review requirement is satisfied by the renovate-approve App instead.
+    bypass_actors:
+      - actor_id: 5
+        actor_type: RepositoryRole
+        bypass_mode: always
+    rules:
+      - type: deletion
+      - type: non_fast_forward
+      - type: required_linear_history
+      - type: pull_request
+        parameters:
+          required_approving_review_count: 1
+          dismiss_stale_reviews_on_push: true
+          require_code_owner_review: false
+          require_last_push_approval: false
+          required_review_thread_resolution: true
+          require_extra_approval_for_unattributed_changes: true
+          allowed_merge_methods:
+            - squash
+      - type: required_status_checks
+        parameters:
+          strict_required_status_checks_policy: false
+          do_not_enforce_on_create: false
+          # Every check that runs on every PR. validate-renovate is deliberately
+          # absent: it is path-filtered on .github/renovate.json5, and a required
+          # check that does not run blocks the PR forever.
+          required_status_checks:
+            - context: build
+              integration_id: 15368
+            - context: integration
+              integration_id: 15368
+            - context: conventional-title
+              integration_id: 15368
+            - context: branch-naming
+              integration_id: 15368
+            - context: DCO
+              integration_id: 1861

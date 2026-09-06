@@ -1,0 +1,10 @@
+# Org-wide defaults for atunko-dev.
+#
+# Deliberately thin. atunko and jbang-catalog disagree on every merge setting
+# and hold different label sets, so anything declared here would overwrite one
+# of them. Both live in suborgs/ instead; only genuinely shared values belong
+# here. Labels in particular are declarative and destructive — a label absent
+# from the config is deleted — so they are declared per suborg, never here.
+
+repository:
+  has_issues: true
