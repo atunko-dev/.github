@@ -14,6 +14,7 @@ until the next sync reverts it.
 | `safe-settings/deployment-settings.yml` | which repos are out of scope |
 | `safe-settings/suborgs/product.yml` | repos with CI — settings, labels, rulesets |
 | `safe-settings/suborgs/meta.yml` | repos without CI — settings, labels, no rulesets |
+| `safe-settings/repos/.github.yml` | this repo: the `safe-settings` environment the sync job runs in |
 
 Labels are declarative and destructive: a label on a repo but absent from the
 config is deleted on the next sync.
